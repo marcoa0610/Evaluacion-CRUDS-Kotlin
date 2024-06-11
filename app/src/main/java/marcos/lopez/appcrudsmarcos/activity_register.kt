@@ -1,5 +1,6 @@
 package marcos.lopez.appcrudsmarcos
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
@@ -9,6 +10,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import modelo.claseConexion
 import java.util.UUID
@@ -18,7 +21,7 @@ class activity_register : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_register)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.txtTicketCard)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
@@ -28,9 +31,10 @@ class activity_register : AppCompatActivity() {
         val txtPasswordRegister = findViewById<TextView>(R.id.txtPasswordRegister)
         val txtEmailRegister = findViewById<TextView>(R.id.txtEmailRegister)
         val btnRegistrarse = findViewById<Button>(R.id.btnRegisterr)
-        val btnAtras = findViewById<Button>(R.id.btnAtras)
 
         btnRegistrarse.setOnClickListener {
+            val Login = Intent (this, MainActivity::class.java)
+            GlobalScope.launch(Dispatchers.IO){
             val objConexion = claseConexion().cadenaConexion()
 
             val registrarUsuario = objConexion?.prepareStatement("Insert into tbUsuarios(UUID_Usuario, Usuario, Contrasena, Correo) VALUES (?,?,?,?)")!!
@@ -39,10 +43,13 @@ class activity_register : AppCompatActivity() {
             registrarUsuario.setString(3, txtPasswordRegister.text.toString())
             registrarUsuario.setString(4, txtEmailRegister.text.toString())
             registrarUsuario.executeUpdate()
-                Toast.makeText(this@activity_register, "Usuario creado", Toast.LENGTH_SHORT).show()
+                withContext(Dispatchers.Main){
+                    Toast.makeText(this@activity_register, "Usuario creado", Toast.LENGTH_SHORT).show()
+                    startActivity(Login)
+                }
 
-        }
 
-        }
+         }
+            }
+         }
     }
-}
