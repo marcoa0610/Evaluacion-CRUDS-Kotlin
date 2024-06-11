@@ -1,5 +1,6 @@
 package marcos.lopez.appcrudsmarcos
 
+import RecyclerViewHelpers.Adaptador
 import android.app.DatePickerDialog
 import android.os.Bundle
 import android.widget.Button
@@ -8,10 +9,15 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import modelo.claseConexion
+import modelo.dataClassTickets
 import java.util.UUID
 import java.util.Calendar
 
@@ -20,7 +26,7 @@ class Menu : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_menu)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.txtTicketCard)) { v, insets ->
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
@@ -34,6 +40,7 @@ class Menu : AppCompatActivity() {
         val txtInitiationDate = findViewById<EditText>(R.id.txtInitiationDate)
         val txtFinalizationDate = findViewById<EditText>(R.id.txtFinalizationDate)
         val btnSendTicket = findViewById<Button>(R.id.btnSendTicket)
+        val rcvTickets = findViewById<RecyclerView>(R.id.rcvTickets)
 
 
         txtInitiationDate.setOnClickListener {
@@ -91,6 +98,42 @@ class Menu : AppCompatActivity() {
                 addTicket.setString(7, "Activo")
                 addTicket.setString(8, txtFinalizationDate.text.toString())
                 addTicket.executeUpdate()
+            }
+
+            rcvTickets.layoutManager = LinearLayoutManager(this)
+
+            //Mostrar datos
+            fun obtenerDatos(): List<dataClassTickets>{
+            val objConexion = claseConexion().cadenaConexion()
+
+            val statement =objConexion?.createStatement()
+            val resulSet = statement?.executeQuery("select * from tbTickets")!!
+
+            val tickets = mutableListOf<dataClassTickets>()
+
+
+            while (resulSet.next()){
+            val numeroTicket = resulSet.getString("NumeroTicket")
+            val tituloTicket = resulSet.getString("TituloTicket")
+            val descripcionTicket = resulSet.getString("descripcionTicket")
+            val autor = resulSet.getString("autor")
+            val correoAutor = resulSet.getString("correoAutor")
+            val fechaCreacion = resulSet.getString("fechaCreacion")
+            val estadoTicket = resulSet.getString("estadoTicket")
+            val fechaFin = resulSet.getString("fechaFin")
+
+                val ticket =dataClassTickets(numeroTicket, tituloTicket, descripcionTicket, autor, correoAutor, fechaCreacion, estadoTicket, fechaFin)
+                tickets.add(ticket)
+            }
+            return tickets
+            }
+            //Asignar el adaptador al recyclerView
+            CoroutineScope(Dispatchers.IO).launch {
+                val bdTickets = obtenerDatos()
+                withContext(Dispatchers.Main){
+                    val adapter = Adaptador(bdTickets)
+                    rcvTickets.adapter =adapter
+                }
             }
         }
     }

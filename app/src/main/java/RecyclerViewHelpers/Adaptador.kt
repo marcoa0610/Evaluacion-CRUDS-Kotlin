@@ -8,7 +8,6 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import marcos.lopez.appcrudsmarcos.R
 import modelo.claseConexion
 import modelo.dataClassTickets
@@ -114,12 +113,12 @@ class Adaptador(private var Datos: List<dataClassTickets>) : RecyclerView.Adapte
 
             val builder = AlertDialog.Builder(context)
             builder.setTitle("Actualizar")
-            builder.setMessage("¿Desea actualizar la mascota?")
+            builder.setMessage("¿Desea actualizar el ticket?")
 
             //Agregarle un cuadro de texto para
             //que el usuario escriba el nuevo nombre
             val cuadroTexto = EditText(context)
-            cuadroTexto.setHint(mascota.tituloTicket)
+            cuadroTexto.setHint(ticket.tituloTicket)
             builder.setView(cuadroTexto)
 
             //Botones
@@ -135,20 +134,7 @@ class Adaptador(private var Datos: List<dataClassTickets>) : RecyclerView.Adapte
             dialog.show()
         }
 
-        //Todo: Clic a la card completa
-        //Vamos a ir a otra pantalla donde me mostrará todos los datos
-        holder.itemView.setOnClickListener {
-            val context = holder.itemView.context
 
-            //Cambiar de pantalla a la pantalla de detalle
-            val pantallaDetalle = Intent(context, detalle_mascota::class.java)
-            //enviar a la otra pantalla todos mis valores
-            pantallaDetalle.putExtra("MascotaUUID", mascota.uuid)
-            pantallaDetalle.putExtra("nombre", mascota.nombreMascota)
-            pantallaDetalle.putExtra("peso", mascota.peso)
-            pantallaDetalle.putExtra("edad", mascota.edad)
-            context.startActivity(pantallaDetalle)
-        }
 
 
 
